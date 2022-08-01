@@ -1,8 +1,9 @@
 import React from 'react';
-import Controls from '../controls/controls';
 import Statistics from '../statistics/statistics';
 import NotificationMessage from '../notificationMessage/notificationMessage';
 import styles from '../formFeedback/formFeedback.module.css';
+import FeedbackOptions from '../FeedbackOptions/feedbackOptions';
+
 
 class Formfeedback extends React.Component {
   state = {
@@ -15,7 +16,6 @@ class Formfeedback extends React.Component {
     this.setState(prevState => {
       return {
         good: prevState.good + 1,
-        visible: true,
       };
     });
   };
@@ -23,7 +23,6 @@ class Formfeedback extends React.Component {
     this.setState(prevState => {
       return {
         neutral: prevState.neutral + 1,
-        visible: true,
       };
     });
   };
@@ -31,36 +30,47 @@ class Formfeedback extends React.Component {
     this.setState(prevState => {
       return {
         bad: prevState.bad + 1,
-        visible: true,
       };
     });
   };
 
+  onLeaveFeedback = name => {
+    this.setState(prev => ({ [name]: prev[name] + 1 }));
+  };
+
+countTotalFeedback = () => {
+  return this.state.good + this.state.neutral + this.state.bad;
+};
+countPositiveFeedbackPercentage = () => {
+  return (100 / this.countTotalFeedback()) * this.state.good;
+};
+
+
   render() {
-    const countTotalFeedback =
-      this.state.good + this.state.neutral + this.state.bad;
-    const countPositiveFeedbackPercentage =
-      (100 / countTotalFeedback) * this.state.good;
+    const { good, neutral, bad } = this.state;
+    const options = [
+      { title: 'Good', name: 'good' },
+      { title: 'Neutral', name: 'neutral' },
+      { title: 'Bad', name: 'bad' },
+    ];
     return (
       <div className={styles.box}>
         <h1 className={styles.title}>Please leave feedback</h1>
-        <div>
-          <Controls
-            onGood={this.handleGood}
-            onNeutral={this.handleNeutral}
-            onBad={this.handleBad}
-          />
+        <div>          
+          <FeedbackOptions
+          onLeaveFeedback={this.onLeaveFeedback}
+          options={options}
+        />
         </div>
-
         <h2>Statistics</h2>
-        {countTotalFeedback ? (
+        {this.countTotalFeedback() ? (
           <div>
             <Statistics
-              positivePercentage={countPositiveFeedbackPercentage}
-              total={countTotalFeedback}
-              stGood={this.state.good}
-              stNeutral={this.state.neutral}
-              stBad={this.state.bad}
+              stGood={good}
+              stNeutral={neutral}
+              stBad={bad}
+              total={this.countTotalFeedback()}
+              positivePercentage={this.countPositiveFeedbackPercentage()}
             />
           </div>
         ) : (
@@ -68,7 +78,7 @@ class Formfeedback extends React.Component {
         )}
       </div>
     );
-  }
+  };
 }
 
 export default Formfeedback;
